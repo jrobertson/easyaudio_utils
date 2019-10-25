@@ -2,8 +2,7 @@
 
 # file: easyaudio_utils.rb
 
-require 'c32'
-require 'wavefile'
+require 'wavtool'
 
 # requirements:
 # `apt-get install mplayer sox vorbis-tools
@@ -29,54 +28,20 @@ module CommandHelper
 
 end
 
-module WavTool
-  include WaveFile
-    
-  def wav_silence(filename, duration: 1)
-
-    square_cycle = [0] * 100 * duration
-    buffer = Buffer.new(square_cycle, Format.new(:mono, :float, 44100))
-
-    Writer.new(filename, Format.new(:mono, :pcm_16, 22050)) do |writer|
-      220.times { writer.write(buffer) }
-    end
-
-  end
-  
-  def wav_concat(files, save_file='audio.wav')
-    
-    Writer.new(save_file, Format.new(:stereo, :pcm_16, 22050)) do |writer|
-
-      files.each do |file_name|
-
-        Reader.new(file_name).each_buffer(samples_per_buffer=4096) do |buffer|
-          writer.write(buffer)
-        end
-
-      end
-    end
-    
-  end
-
-  def duration(file_name)
-    Reader.new(file_name).total_duration    
-  end
-
-end
-
 
 class EasyAudioUtils
   extend CommandHelper
-  include WavTool
+
 
 @commands = "
-* capture_desktop # records the desktop
+* capture # records audio in FLAC format
 * concat_files # stiches wav files together
 * convert # converts a file from 1 format to another #wav #ogg
 * duration # return the duration for a wav or ogg 
 * generate_silence # generates silence in a wav file
 * play # plays using mplayer
 * record # alias for capture_desktop
+* split # split the wav file by silence
 ".strip.lines.map {|x| x[/(?<=\* ).*/]}.sort
 
 
@@ -90,7 +55,7 @@ class EasyAudioUtils
   # records audio in mono audio
   # tested with .flac
   #
-  def capture()
+  def capture(show: false)
 
     command = "rec -c 1 -r 8000 -t alsa default #{@file_out} " + 
         "silence 1 0.1 5% 5 1.0 5%"
@@ -99,7 +64,7 @@ class EasyAudioUtils
   end
   
   def concat_files(files=[])
-    wav_concat files, @file_out
+    WavTool.new(out: @file_out, ).concat files
   end
   
   alias concat concat_files
@@ -107,7 +72,7 @@ class EasyAudioUtils
   def convert()
         
     if File.extname(@file_in) == '.ogg' then
-        ogg_to_wav() if File.extname(@file_out) == '.wav' 
+      ogg_to_wav() if File.extname(@file_out) == '.wav' 
     end
     
   end
@@ -116,9 +81,11 @@ class EasyAudioUtils
     
     case File.extname(@file_in)
     when '.ogg'
-      ogg_duration()
+      OggInfo.open(@file_in).length.to_i
     when '.wav'
-      wav_duration()
+      WavTool.new().duration(@file_in)
+    when '.mp3'
+      Mp3Info.new(@file_in).length.to_i
     end    
     
   end
@@ -126,7 +93,7 @@ class EasyAudioUtils
   # silence duration in seconds
   #
   def generate_silence(duration)
-    wav_silence @out_file, duration: duration
+    WavTool.new(out: @out_file).silence duration: duration
   end
   
   alias record capture
@@ -135,20 +102,24 @@ class EasyAudioUtils
     command = "mplayer #{@file_out}"
     run command, show
   end
+  
+  # split by silence
+  #
+  def split(show: false)    
+    command = "sox -V3 #{@file_in} #{@file_out} silence -l  0  " +
+        " 1 0.5 0.1% : newfile : restart"
+    run command, show
+  end
 
 
   private
   
-  def ogg_duration()
-    OggInfo.open(@file_in) {|ogg| ogg.length.to_i }    
-  end
   
   def ogg_to_wav()
     `oggdec #{@file_in} #{@file_out}`
-  end
-  
+  end  
 
-  def run(command, show: false)
+  def run(command, show=false)
 
     if show then 
       command
@@ -160,4 +131,3 @@ class EasyAudioUtils
   end  
 
 end
-
