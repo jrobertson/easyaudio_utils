@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'easyaudio_utils'
-  s.version = '0.2.2'
+  s.version = '0.2.3'
   s.summary = 'A wrapper for various command-line audio utilities ' + 
       'under GNU/Linux.'
   s.authors = ['James Robertson']

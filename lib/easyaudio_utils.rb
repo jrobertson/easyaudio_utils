@@ -7,6 +7,12 @@ require 'wavtool'
 # requirements:
 # `apt-get install mplayer sox vorbis-tools
 
+# installing youtube-dl:
+# 
+# `sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/bin/youtube-dl`
+#
+# `sudo chmod a+rx /usr/bin/youtube-dl`
+
 
 module CommandHelper
   using ColouredText
@@ -42,6 +48,7 @@ class EasyAudioUtils
 * play # plays using mplayer
 * record # alias for capture_desktop
 * split # split the wav file by silence
+* youtube_dl # downloads audio in Ogg (opus) format
 ".strip.lines.map {|x| x[/(?<=\* ).*/]}.sort
 
 
@@ -110,6 +117,18 @@ class EasyAudioUtils
         " 1 0.5 0.1% : newfile : restart"
     run command, show
   end
+  
+  # Download and extract audio from a video on YouTube
+  #
+  # By default, Youtube-dl will save the audio in Ogg (opus) format.
+  #
+  def youtube_dl(show: false)    
+    
+    command = "youtube-dl -x #{url=@file_in}"
+    command += ' -o ' + @file_out if @file_out
+    run command, show    
+
+  end  
 
 
   private
