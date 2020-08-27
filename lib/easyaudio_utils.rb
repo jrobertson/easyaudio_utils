@@ -3,15 +3,19 @@
 # file: easyaudio_utils.rb
 
 require 'wavtool'
+require 'ogginfo'
 
 # requirements:
-# `apt-get install mplayer sox vorbis-tools
+# `apt-get install mplayer sox vorbis-tools ffmpeg
 
 # installing youtube-dl:
 # 
 # `sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/bin/youtube-dl`
 #
 # `sudo chmod a+rx /usr/bin/youtube-dl`
+#
+# note: avconv is included with ffmpeg
+#
 
 
 module CommandHelper
@@ -43,6 +47,7 @@ class EasyAudioUtils
 * capture # records audio in FLAC format
 * concat_files # stiches wav files together
 * convert # converts a file from 1 format to another #wav #ogg
+* cut # cuts the audio into a new file as defined by start time and duration
 * duration # return the duration for a wav or ogg 
 * generate_silence # generates silence in a wav file
 * play # plays using mplayer
@@ -84,15 +89,23 @@ class EasyAudioUtils
     
   end
   
+  def cut(starttime, duration)    
+    
+    command = "avconv -i %s -ss %s -t %s %s" % \
+        [@file_in, starttime, duration, @file_out]
+    run command, show    
+    
+  end
+  
   def duration()
     
     case File.extname(@file_in)
     when '.ogg'
-      OggInfo.open(@file_in).length.to_i
+      OggInfo.open(@file_in).length
     when '.wav'
       WavTool.new().duration(@file_in)
     when '.mp3'
-      Mp3Info.new(@file_in).length.to_i
+      Mp3Info.new(@file_in).length
     end    
     
   end
@@ -100,7 +113,7 @@ class EasyAudioUtils
   # silence duration in seconds
   #
   def generate_silence(duration)
-    WavTool.new(out: @out_file).silence duration: duration
+    WavTool.new(out: @file_out).silence duration: duration
   end
   
   alias record capture
