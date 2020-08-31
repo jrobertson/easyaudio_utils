@@ -81,14 +81,20 @@ class EasyAudioUtils
   
   alias concat concat_files
   
+  # convert either wav to ogg or ogg to wav
+  #
   def convert()
         
     if File.extname(@file_in) == '.ogg' then
       ogg_to_wav() if File.extname(@file_out) == '.wav' 
+    else
+      wav_to_ogg() if File.extname(@file_out) == '.ogg' 
     end
     
   end
   
+  # cut a section of audio and save it to file
+  #
   def cut(starttime, duration)    
     
     command = "avconv -i %s -ss %s -t %s %s" % \
@@ -150,6 +156,10 @@ class EasyAudioUtils
   def ogg_to_wav()
     `oggdec #{@file_in} #{@file_out}`
   end  
+  
+  def ogg_to_wav()
+    `sox -V #{@file_in} #{@file_out}`
+  end   
 
   def run(command, show=false)
 
