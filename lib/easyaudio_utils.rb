@@ -53,6 +53,7 @@ class EasyAudioUtils
 * play # plays using mplayer
 * record # alias for capture_desktop
 * split # split the wav file by silence
+* volume # increase or decrease (0.50 is equal to 50%)
 * youtube_dl # downloads audio in Ogg (opus) format
 ".strip.lines.map {|x| x[/(?<=\* ).*/]}.sort
 
@@ -136,6 +137,13 @@ class EasyAudioUtils
         " 1 0.5 0.1% : newfile : restart"
     run command, show
   end
+  
+  # volume increase or decrease
+  #
+  def volume(amount=1.0, show: false)    
+    command = "sox -v #{amount} #{@file_in} #{@file_out}"
+    run command, show
+  end  
   
   # Download and extract audio from a video on YouTube
   #
