@@ -1,0 +1,29 @@
+{
+  "directory": {
+    "summary": {
+      "schema": "directory[title, file_path,  last_modified, description]/file(name, type, ext, mtime, description)",
+      "recordx_type": "dynarex",
+      "default_key": "name",
+      "title": "Index of /home/james/gem_src/easyaudio_utils/lib",
+      "file_path": "/home/james/gem_src/easyaudio_utils/lib",
+      "last_modified": "2022-03-06 12:20:45 +0000",
+      "description": null
+    },
+    "records": [
+      {
+        "file": {
+          "id": "1",
+          "created": "2022-03-06 12:20:45 +0000",
+          "last_modified": null,
+          "body": {
+            "name": "easyaudio_utils.rb",
+            "type": "file",
+            "ext": ".rb",
+            "mtime": "2020-09-02 23:49:11 +0100",
+            "description": ""
+          }
+        }
+      }
+    ]
+  }
+}
