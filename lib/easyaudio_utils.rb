@@ -77,7 +77,9 @@ class EasyAudioUtils
   end
 
   def concat_files(files=[], sample_rate: nil)
-    WavTool.new(out: @file_out, sample_rate: sample_rate).concat files
+
+    WavTool.new(out: @file_out, sample_rate: sample_rate,
+                src_path: @working_dir).concat files
   end
 
   alias concat concat_files
